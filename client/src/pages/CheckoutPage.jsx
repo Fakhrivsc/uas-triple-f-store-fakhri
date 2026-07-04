@@ -206,6 +206,7 @@ export default function CheckoutPage() {
       });
 
       const order = res.data.data.order;
+      const waLink = res.data.data.waLink;
       dispatch(clearCart());
 
       if (selectedPayment === 'midtrans') {
@@ -231,6 +232,9 @@ export default function CheckoutPage() {
         }
       } else {
         toast.success('Pesanan berhasil dibuat!');
+        if (waLink) {
+          setTimeout(() => window.open(waLink, '_blank'), 300);
+        }
         navigate(`/payment/${order.id}`);
       }
     } catch (err) {

@@ -58,6 +58,10 @@ export default function AdminSettings() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Jam Operasional</label>
               <input type="text" value={settings.store_hours || ''} onChange={e => set('store_hours', e.target.value)} className="input-field" />
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">WhatsApp Owner (Notifikasi Order)</label>
+              <input type="text" value={settings.owner_whatsapp || ''} onChange={e => set('owner_whatsapp', e.target.value)} className="input-field" placeholder="Contoh: 6281234567890" />
+            </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Alamat</label>
               <textarea value={settings.store_address || ''} onChange={e => set('store_address', e.target.value)} rows={2} className="input-field" />

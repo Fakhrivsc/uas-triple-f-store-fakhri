@@ -1,6 +1,6 @@
 'use strict';
 
-const { Order, OrderItem, Product, User, UserAddress, Payment, Shipment, sequelize } = require('../models');
+const { Order, OrderItem, Product, User, UserAddress, Payment, Shipment, Setting, sequelize } = require('../models');
 const { generateOrderNumber, calculateShipping } = require('../utils/helpers');
 const { Op } = require('sequelize');
 
@@ -83,8 +83,33 @@ exports.createOrder = async (req, res) => {
 
     await t.commit();
 
+    // Build WhatsApp notification link for owner
+    let waLink = null;
+    try {
+      const ownerWaSetting = await Setting.findOne({ where: { key: 'owner_whatsapp' } });
+      const ownerNumber = (ownerWaSetting?.value || '6281234567890').replace(/[^0-9]/g, '');
+
+      let waText = `*ORDER BARU - Triple-F Store*\n\n`;
+      waText += `No. Order: *${order_number}*\n`;
+      waText += `Pembayaran: ${payment_method}\n`;
+      waText += `Kurir: ${courier} - ${service_type}\n\n`;
+      waText += `*Detail Pesanan:*\n`;
+      orderItemsData.forEach((item, i) => {
+        waText += `${i + 1}. ${item.product_name} x${item.quantity} = Rp${Number(item.subtotal).toLocaleString('id-ID')}\n`;
+      });
+      waText += `\nSubtotal: Rp${Number(subtotal).toLocaleString('id-ID')}`;
+      waText += `\nOngkir (${courier}): Rp${Number(shipping_cost).toLocaleString('id-ID')}`;
+      waText += `\n*TOTAL: Rp${Number(total).toLocaleString('id-ID')}*`;
+      if (notes) waText += `\n\nCatatan: ${notes}`;
+      waText += `\n\n_Mohon dikonfirmasi. Terima kasih!_`;
+
+      waLink = `https://wa.me/${ownerNumber}?text=${encodeURIComponent(waText)}`;
+    } catch (waErr) {
+      console.error('[WA] Failed to build WhatsApp link:', waErr.message);
+    }
+
     const result = await Order.findByPk(order.id, { include: ORDER_INCLUDES });
-    return res.status(201).json({ success: true, message: 'Pesanan berhasil dibuat', data: { order: result } });
+    return res.status(201).json({ success: true, message: 'Pesanan berhasil dibuat', data: { order: result, waLink } });
   } catch (err) {
     await t.rollback();
     console.error(err);

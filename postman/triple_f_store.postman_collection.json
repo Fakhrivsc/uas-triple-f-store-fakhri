@@ -1,0 +1,587 @@
+{
+  "info": {
+    "name": "Triple-F Store API",
+    "description": "Complete API collection for Triple-F Store Online Shop - UAS Project. Base URL: http://localhost:5000/api/v1",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:5000/api/v1", "type": "string" },
+    { "key": "token", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [{ "listen": "test", "script": { "exec": ["const r = pm.response.json();", "if (r.success && r.data && r.data.token) {", "  pm.collectionVariables.set('token', r.data.token);", "  console.log('Token saved:', r.data.token.substring(0,20)+'...');", "}"], "type": "text/javascript" } }],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@triplef.com\",\n  \"password\": \"Admin123!\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/login", "host": ["{{base_url}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Register Customer",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Budi Santoso\",\n  \"email\": \"budi@example.com\",\n  \"password\": \"Password123!\",\n  \"phone\": \"081234567890\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/register", "host": ["{{base_url}}"], "path": ["auth", "register"] }
+          }
+        },
+        {
+          "name": "Get Current User (Me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/users/me", "host": ["{{base_url}}"], "path": ["users", "me"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/auth/logout", "host": ["{{base_url}}"], "path": ["auth", "logout"] }
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"refreshToken\": \"your_refresh_token_here\"\n}" },
+            "url": { "raw": "{{base_url}}/auth/refresh", "host": ["{{base_url}}"], "path": ["auth", "refresh"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Produk (CRUD)",
+      "item": [
+        {
+          "name": "Get All Produk",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/products?page=1&limit=12", "host": ["{{base_url}}"], "path": ["products"], "query": [{"key":"page","value":"1"},{"key":"limit","value":"12"}] }
+          }
+        },
+        {
+          "name": "Get Produk by Slug",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/products/daging-sapi-sirloin", "host": ["{{base_url}}"], "path": ["products", "daging-sapi-sirloin"] }
+          }
+        },
+        {
+          "name": "Search Produk",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/products?search=daging&category=1&min_price=10000&max_price=500000&sort=price&order=ASC", "host": ["{{base_url}}"], "path": ["products"], "query": [{"key":"search","value":"daging"},{"key":"category","value":"1"},{"key":"min_price","value":"10000"},{"key":"max_price","value":"500000"},{"key":"sort","value":"price"},{"key":"order","value":"ASC"}] }
+          }
+        },
+        {
+          "name": "Create Produk (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key":"name","value":"Daging Sapi Premium","type":"text"},
+                {"key":"description","value":"Daging sapi segar pilihan kualitas premium, cocok untuk berbagai olahan masakan","type":"text"},
+                {"key":"price","value":"125000","type":"text"},
+                {"key":"discount_price","value":"110000","type":"text"},
+                {"key":"stock","value":"50","type":"text"},
+                {"key":"weight_gram","value":"500","type":"text"},
+                {"key":"category_id","value":"1","type":"text"},
+                {"key":"is_active","value":"true","type":"text"},
+                {"key":"images","src":"","type":"file","description":"Upload gambar produk (bisa lebih dari 1)"}
+              ]
+            },
+            "url": { "raw": "{{base_url}}/products", "host": ["{{base_url}}"], "path": ["products"] }
+          }
+        },
+        {
+          "name": "Update Produk (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key":"price","value":"130000","type":"text"},
+                {"key":"stock","value":"45","type":"text"},
+                {"key":"is_active","value":"true","type":"text"}
+              ]
+            },
+            "url": { "raw": "{{base_url}}/products/1", "host": ["{{base_url}}"], "path": ["products", "1"] }
+          }
+        },
+        {
+          "name": "Bulk Update Status Produk (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"ids\": [1, 2, 3],\n  \"is_active\": false\n}" },
+            "url": { "raw": "{{base_url}}/products/bulk-status", "host": ["{{base_url}}"], "path": ["products", "bulk-status"] }
+          }
+        },
+        {
+          "name": "Delete Produk (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/products/1", "host": ["{{base_url}}"], "path": ["products", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Kategori",
+      "item": [
+        {
+          "name": "Get All Kategori",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] }
+          }
+        },
+        {
+          "name": "Create Kategori (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key":"name","value":"Daging Sapi","type":"text"},
+                {"key":"description","value":"Berbagai jenis potongan daging sapi segar","type":"text"},
+                {"key":"image","src":"","type":"file"}
+              ]
+            },
+            "url": { "raw": "{{base_url}}/categories", "host": ["{{base_url}}"], "path": ["categories"] }
+          }
+        },
+        {
+          "name": "Update Kategori (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key":"name","value":"Daging Sapi & Kambing","type":"text"}
+              ]
+            },
+            "url": { "raw": "{{base_url}}/categories/1", "host": ["{{base_url}}"], "path": ["categories", "1"] }
+          }
+        },
+        {
+          "name": "Delete Kategori (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/categories/1", "host": ["{{base_url}}"], "path": ["categories", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pesanan (Checkout & Orders)",
+      "item": [
+        {
+          "name": "Checkout - Buat Pesanan",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address_id\": 1,\n  \"items\": [\n    { \"product_id\": 1, \"quantity\": 2 },\n    { \"product_id\": 3, \"quantity\": 1 }\n  ],\n  \"courier\": \"jne\",\n  \"service_type\": \"REG\",\n  \"shipping_cost\": 15000,\n  \"payment_method\": \"bank_transfer\",\n  \"notes\": \"Tolong dikemas dengan baik\"\n}"
+            },
+            "url": { "raw": "{{base_url}}/orders", "host": ["{{base_url}}"], "path": ["orders"] }
+          }
+        },
+        {
+          "name": "Get Pesanan Saya",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/mine?page=1&limit=10", "host": ["{{base_url}}"], "path": ["orders", "mine"], "query": [{"key":"page","value":"1"},{"key":"limit","value":"10"}] }
+          }
+        },
+        {
+          "name": "Get Detail Pesanan by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/1", "host": ["{{base_url}}"], "path": ["orders", "1"] }
+          }
+        },
+        {
+          "name": "Cancel Pesanan",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/1/cancel", "host": ["{{base_url}}"], "path": ["orders", "1", "cancel"] }
+          }
+        },
+        {
+          "name": "Get All Pesanan (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/admin?page=1&limit=15&status=pending", "host": ["{{base_url}}"], "path": ["orders", "admin"], "query": [{"key":"page","value":"1"},{"key":"limit","value":"15"},{"key":"status","value":"pending"}] }
+          }
+        },
+        {
+          "name": "Update Status Pesanan (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"processing\",\n  \"tracking_number\": \"JNE12345678\"\n}" },
+            "url": { "raw": "{{base_url}}/orders/1/status", "host": ["{{base_url}}"], "path": ["orders", "1", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pembayaran",
+      "item": [
+        {
+          "name": "Get Payment by Order ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/payments/1", "host": ["{{base_url}}"], "path": ["payments", "1"] }
+          }
+        },
+        {
+          "name": "Create Midtrans Transaction",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"order_id\": 1\n}" },
+            "url": { "raw": "{{base_url}}/payments/create-transaction", "host": ["{{base_url}}"], "path": ["payments", "create-transaction"] }
+          }
+        },
+        {
+          "name": "Upload Bukti Pembayaran",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [{"key":"proof","src":"","type":"file","description":"Upload foto bukti transfer"}]
+            },
+            "url": { "raw": "{{base_url}}/payments/1/upload-proof", "host": ["{{base_url}}"], "path": ["payments", "1", "upload-proof"] }
+          }
+        },
+        {
+          "name": "Konfirmasi Pembayaran (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/payments/1/confirm", "host": ["{{base_url}}"], "path": ["payments", "1", "confirm"] }
+          }
+        },
+        {
+          "name": "Tolak Pembayaran (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Bukti pembayaran tidak valid\"\n}" },
+            "url": { "raw": "{{base_url}}/payments/1/reject", "host": ["{{base_url}}"], "path": ["payments", "1", "reject"] }
+          }
+        },
+        {
+          "name": "Get All Pembayaran (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/payments/admin?page=1&status=pending", "host": ["{{base_url}}"], "path": ["payments", "admin"], "query": [{"key":"page","value":"1"},{"key":"status","value":"pending"}] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Keranjang (Cart)",
+      "item": [
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] }
+          }
+        },
+        {
+          "name": "Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"product_id\": 1,\n  \"quantity\": 2\n}" },
+            "url": { "raw": "{{base_url}}/cart", "host": ["{{base_url}}"], "path": ["cart"] }
+          }
+        },
+        {
+          "name": "Update Cart Item",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"quantity\": 3\n}" },
+            "url": { "raw": "{{base_url}}/cart/1", "host": ["{{base_url}}"], "path": ["cart", "1"] }
+          }
+        },
+        {
+          "name": "Remove Cart Item",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/cart/1", "host": ["{{base_url}}"], "path": ["cart", "1"] }
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/cart/clear", "host": ["{{base_url}}"], "path": ["cart", "clear"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Wishlist",
+      "item": [
+        {
+          "name": "Get Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/wishlist", "host": ["{{base_url}}"], "path": ["wishlist"] }
+          }
+        },
+        {
+          "name": "Add to Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/wishlist/1", "host": ["{{base_url}}"], "path": ["wishlist", "1"] }
+          }
+        },
+        {
+          "name": "Remove from Wishlist",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/wishlist/1", "host": ["{{base_url}}"], "path": ["wishlist", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ulasan (Reviews)",
+      "item": [
+        {
+          "name": "Get Reviews by Product",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/reviews/product/1", "host": ["{{base_url}}"], "path": ["reviews", "product", "1"] }
+          }
+        },
+        {
+          "name": "Create Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"product_id\": 1,\n  \"order_id\": 1,\n  \"rating\": 5,\n  \"comment\": \"Daging sangat segar dan berkualitas, pengiriman cepat!\"\n}" },
+            "url": { "raw": "{{base_url}}/reviews", "host": ["{{base_url}}"], "path": ["reviews"] }
+          }
+        },
+        {
+          "name": "Get All Reviews (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/reviews/admin?page=1", "host": ["{{base_url}}"], "path": ["reviews", "admin"], "query": [{"key":"page","value":"1"}] }
+          }
+        },
+        {
+          "name": "Delete Review (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/reviews/1", "host": ["{{base_url}}"], "path": ["reviews", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Alamat",
+      "item": [
+        {
+          "name": "Get Alamat Saya",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/addresses", "host": ["{{base_url}}"], "path": ["addresses"] }
+          }
+        },
+        {
+          "name": "Tambah Alamat",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"label\": \"Rumah\",\n  \"recipient_name\": \"Budi Santoso\",\n  \"phone\": \"081234567890\",\n  \"province\": \"Jawa Barat\",\n  \"province_id\": \"9\",\n  \"city\": \"Bandung\",\n  \"city_id\": \"23\",\n  \"district\": \"Cicendo\",\n  \"postal_code\": \"40174\",\n  \"full_address\": \"Jl. Merdeka No. 10, RT 01/RW 02\",\n  \"is_default\": true\n}" },
+            "url": { "raw": "{{base_url}}/addresses", "host": ["{{base_url}}"], "path": ["addresses"] }
+          }
+        },
+        {
+          "name": "Update Alamat",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"label\": \"Kantor\",\n  \"recipient_name\": \"Budi Santoso\",\n  \"phone\": \"081234567890\",\n  \"full_address\": \"Jl. Sudirman No. 5\"\n}" },
+            "url": { "raw": "{{base_url}}/addresses/1", "host": ["{{base_url}}"], "path": ["addresses", "1"] }
+          }
+        },
+        {
+          "name": "Set Alamat Default",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/addresses/1/default", "host": ["{{base_url}}"], "path": ["addresses", "1", "default"] }
+          }
+        },
+        {
+          "name": "Hapus Alamat",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/addresses/1", "host": ["{{base_url}}"], "path": ["addresses", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pengiriman (Shipping)",
+      "item": [
+        {
+          "name": "Get Provinsi",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/shipping/provinces", "host": ["{{base_url}}"], "path": ["shipping", "provinces"] }
+          }
+        },
+        {
+          "name": "Get Kota by Provinsi",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/shipping/cities/9", "host": ["{{base_url}}"], "path": ["shipping", "cities", "9"] }
+          }
+        },
+        {
+          "name": "Cek Ongkir",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"origin_city_id\": \"501\",\n  \"destination_city_id\": \"23\",\n  \"weight\": 1000,\n  \"courier\": \"jne\"\n}" },
+            "url": { "raw": "{{base_url}}/shipping/cost", "host": ["{{base_url}}"], "path": ["shipping", "cost"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Manajemen User (Admin)",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/users?page=1&limit=15", "host": ["{{base_url}}"], "path": ["users"], "query": [{"key":"page","value":"1"},{"key":"limit","value":"15"}] }
+          }
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/users/1", "host": ["{{base_url}}"], "path": ["users", "1"] }
+          }
+        },
+        {
+          "name": "Update Status User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }, { "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "raw", "raw": "{\n  \"is_active\": false\n}" },
+            "url": { "raw": "{{base_url}}/users/1/status", "host": ["{{base_url}}"], "path": ["users", "1", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Pengaturan Toko",
+      "item": [
+        {
+          "name": "Get Pengaturan",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/settings", "host": ["{{base_url}}"], "path": ["settings"] }
+          }
+        },
+        {
+          "name": "Update Pengaturan (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {"key":"store_name","value":"Triple-F Store","type":"text"},
+                {"key":"store_phone","value":"081234567890","type":"text"},
+                {"key":"store_email","value":"info@triplef.com","type":"text"},
+                {"key":"owner_whatsapp","value":"6281234567890","type":"text"},
+                {"key":"store_hours","value":"08:00 - 17:00 WIB","type":"text"}
+              ]
+            },
+            "url": { "raw": "{{base_url}}/settings", "host": ["{{base_url}}"], "path": ["settings"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard Admin",
+      "item": [
+        {
+          "name": "Get Summary Dashboard",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/dashboard/summary", "host": ["{{base_url}}"], "path": ["dashboard", "summary"] }
+          }
+        },
+        {
+          "name": "Get Chart Data",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/dashboard/chart?period=month", "host": ["{{base_url}}"], "path": ["dashboard", "chart"], "query": [{"key":"period","value":"month"}] }
+          }
+        },
+        {
+          "name": "Get Top Products",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/dashboard/top-products?limit=5", "host": ["{{base_url}}"], "path": ["dashboard", "top-products"], "query": [{"key":"limit","value":"5"}] }
+          }
+        }
+      ]
+    }
+  ]
+}
