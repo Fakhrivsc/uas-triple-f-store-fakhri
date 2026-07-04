@@ -1,0 +1,10 @@
+node_modules/
+.env
+dist/
+build/
+server/uploads/avatars/
+server/uploads/products/
+server/uploads/categories/
+server/uploads/payments/
+server/uploads/settings/
+*.log
