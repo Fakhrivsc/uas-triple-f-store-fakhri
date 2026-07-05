@@ -47,8 +47,9 @@ export default function ProductCard({ product, onWishlistChange }) {
           className="w-full h-56 object-cover rounded-t-xl group-hover:scale-105 transition-transform duration-300"
           onError={e => {
             // Fallback to first available public image
-            if (e.target.src !== window.location.origin + '/images/daging%20steak.jpg.jpeg') {
-              e.target.src = '/images/daging%20steak.jpg.jpeg';
+            const fallbackSrc = getImageUrl(null);
+            if (!e.target.src.endsWith(fallbackSrc)) {
+              e.target.src = fallbackSrc;
             }
           }}
         />

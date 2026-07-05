@@ -17,12 +17,18 @@ export const formatDateTime = (date) => {
 };
 
 export const getImageUrl = (url) => {
-  if (!url) return '/images/daging steak.jpg.jpeg'; // sensible default from public folder
+  const base = import.meta.env.BASE_URL || '/';
+  const basePath = base.replace(/\/$/, '');
+
+  if (!url) return `${basePath}/images/daging%20steak.jpg.jpeg`; // sensible default from public folder
   if (url.startsWith('http')) return url;
+  
   // Local public folder images (e.g. /images/...) — encode spaces for browser fetch
   if (url.startsWith('/images/')) {
-    return url.split('/').map((seg, i) => i === 0 ? seg : encodeURIComponent(seg)).join('/');
+    const encodedUrl = url.split('/').map((seg, i) => i === 0 ? seg : encodeURIComponent(seg)).join('/');
+    return `${basePath}${encodedUrl}`;
   }
+  
   // Uploaded files served from the API server (e.g. /uploads/...)
   return `${import.meta.env.VITE_API_URL?.replace('/api/v1', '') || 'http://localhost:5000'}${url}`;
 };
